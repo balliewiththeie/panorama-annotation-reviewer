@@ -1,10 +1,10 @@
 # Pipe Annotation Reviewer
 
-A browser-based interface for reviewing and editing pipe-component annotations. This local demonstration uses three supplied Genshin Impact scenes instead of confidential project imagery.
+A browser-based interface for reviewing and editing pipe-component annotations. This demonstration uses three supplied Genshin Impact scenes instead of confidential project imagery.
 
 ## Open the demo
 
-Open index.html in a modern desktop browser. No install or backend is required. Use the view selector or arrow buttons to switch between three independent scenes.
+[Open the live demo](https://balliewiththeie.github.io/panorama-annotation-reviewer/) once GitHub Pages deployment is complete. You can also open index.html locally in a modern desktop browser. No install or backend is required. Use the view selector or arrow buttons to switch between three independent scenes.
 
 ## Try it
 
@@ -20,15 +20,15 @@ Edits are stored in this browser. Export JSON for a portable copy. The sample bo
 
 I directed the interface through prompts and iteration. Codex generated the implementation. This project demonstrates an AI-assisted UI workflow; it is not presented as independently hand-written code.
 
-## Local sample image sources
+## Sample image sources and rights
 
 The user supplied three Genshin Impact screenshots. Source references supplied by the user:
 
 - https://gurugamer.com/mobile-games/genshin-impact-fontaine-release-sneak-peek-22471
 - https://www.hoyolab.com/article/24005097
 
-The exact source of each of the first two screenshots has not been independently verified. The third screenshot was supplied alongside these source links. Game imagery belongs to its respective rights holders; this demo is not affiliated with or endorsed by them. Public redistribution permission has not been established. No license to the images is granted here.
+The exact source of each of the first two screenshots has not been independently verified. The third screenshot was supplied alongside these source links. © All rights reserved by COGNOSPHERE. Other properties belong to their respective owners. This demo is not affiliated with or endorsed by HoYoverse. The screenshots are third-party demonstration assets, not original artwork by this project's author, and are excluded from any code license. Permission for this specific redistribution has not been independently verified.
 
-## Before publishing
+## GitHub Pages setup
 
-This is a LOCAL PREVIEW, not a publication-ready package. The images directory is excluded from Git as a precaution. Replace the images with cleared assets before publishing a working public demo. Do not upload a ZIP of this folder as-is: it contains the local game screenshots. Original project images, annotations, identifiers, and history are not included.
+Upload the contents of this folder to the repository root, including assets/ and images/. In Settings → Pages, choose Deploy from a branch, main, and /(root), then Save. This is a static site with no build dependencies. Original confidential project images, annotations, identifiers, and history are not included.
