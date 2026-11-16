@@ -23,7 +23,7 @@ vp.addEventListener('mousedown',e=>{if(e.button===1)e.preventDefault();});
 vp.addEventListener('auxclick',e=>{if(e.button===1||e.button===2)e.preventDefault();});
 // The image owns right-click so the browser menu cannot interrupt the second click.
 vp.addEventListener('contextmenu',e=>e.preventDefault());
-function notice(s,error=false){$('notice').textContent=s;$('notice').style.color=error?'#ffb6a9':'';}
+function notice(s,error=false){$('notice').textContent=s;$('notice').style.color=error?'#a04c43':'';}
 function validQuad(q){if(!Array.isArray(q)||q.length!==4||!q.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&p[0]>=-.01&&p[0]<=W+.01&&p[1]>=-.01&&p[1]<=H+.01))return false;
  const e=q.map((p,i)=>[q[(i+1)%4][0]-p[0],q[(i+1)%4][1]-p[1]]),lens=e.map(v=>Math.hypot(...v));
  if(Math.min(...lens)<1)return false;
@@ -142,8 +142,8 @@ function draw(){
  $('world').setAttribute('transform',`translate(${tx} ${ty}) scale(${scale})`);$('polygons').replaceChildren();$('screenOverlay').replaceChildren();
  const shown=list().filter(visible).sort((a,b)=>{const area=q=>Math.abs((q[1][0]-q[0][0])*(q[3][1]-q[0][1])-(q[1][1]-q[0][1])*(q[3][0]-q[0][0]));return area(b.quad_pixels)-area(a.quad_pixels);});
  if($('show').checked)for(const a of shown){const color=a.uncertain?'#ffbf66':colors[a.proposed_class],sel=a.id===selected;
-  $('polygons').append(node('polygon',{points:a.quad_pixels.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#071019','stroke-width':sel?5.3:4.4,'stroke-opacity':.85,'vector-effect':'non-scaling-stroke','pointer-events':'none','stroke-dasharray':a.uncertain?'5 4':'none'}));
-  const p=node('polygon',{points:a.quad_pixels.map(p=>p.join(',')).join(' '),fill:sel?color+'15':'transparent',stroke:color,'stroke-width':sel?3.3:2.4,'vector-effect':'non-scaling-stroke','stroke-dasharray':a.uncertain?'5 4':'none','data-box-id':a.id});
+  $('polygons').append(node('polygon',{points:a.quad_pixels.map(p=>p.join(',')).join(' '),fill:'none',stroke:'#071019','stroke-width':sel?3.7:2.9,'stroke-opacity':.85,'vector-effect':'non-scaling-stroke','pointer-events':'none','stroke-dasharray':a.uncertain?'5 4':'none'}));
+  const p=node('polygon',{points:a.quad_pixels.map(p=>p.join(',')).join(' '),fill:sel?color+'15':'transparent',stroke:color,'stroke-width':sel?2.5:2,'vector-effect':'non-scaling-stroke','stroke-dasharray':a.uncertain?'5 4':'none','data-box-id':a.id});
   const title=node('title');title.textContent=`${a.id} ${a.proposed_class}${a.uncertain?' (uncertain)':''}`;p.append(title);$('polygons').append(p);
   if(!a.uncertain&&($('ids').value==='all'||($('ids').value==='selected'&&sel))){
    const coords=a.quad_pixels.map(screen),anchor=coords.reduce((b,p)=>p[1]<b[1]?p:b),x=Math.max(3,Math.min(vp.clientWidth-23,anchor[0]+3)),y=Math.max(12,Math.min(vp.clientHeight-3,anchor[1]-5));
@@ -233,7 +233,7 @@ function drawUncertainMarkers(){
 $('uncertainCard').onclick=nextUncertainView;
 $('nextUncertainBox').onclick=nextUncertainBox;
 
-function progress(){renderUncertaintyCards();[...$('grid').children].forEach((b,i)=>{const r=state.reviews[i+1]||{};b.classList.toggle('active',i===index);b.style.boxShadow=({looks_correct:'inset 0 -3px #6bd499',needs_changes:'inset 0 -3px #ffc369',exclude:'inset 0 -3px #8898ac'})[r.decision]||'none';});$('progress').textContent=Object.values(state.reviews).filter(r=>r.decision==='looks_correct').length+'/'+DATA.views.length+' reviewed';}
+function progress(){renderUncertaintyCards();[...$('grid').children].forEach((b,i)=>{const r=state.reviews[i+1]||{};b.classList.toggle('active',i===index);b.style.boxShadow=({looks_correct:'inset 0 -3px #a3af98',needs_changes:'inset 0 -3px #b49462',exclude:'inset 0 -3px #aaa99f'})[r.decision]||'none';});$('progress').textContent=Object.values(state.reviews).filter(r=>r.decision==='looks_correct').length+'/'+DATA.views.length+' reviewed';}
 function renderView(reset=true){saveUI();const v=view();$('view').value=index;$('photo').setAttribute('href',v.image);$('viewTitle').textContent=`View ${String(v.view_index).padStart(2,'0')} · ${v.pitch_band}`;renderSidebar();progress();if(reset)fit();else draw();buttons();}
 function change(i){if(drag)return;lastUncertainView=null;cancelPendingChord();lastPointer=null;lastRightClick=null;lastLeftClick=null;index=(i+DATA.views.length)%DATA.views.length;selected=null;tempQuad=null;renderView();}
 
