@@ -87,7 +87,8 @@ header small { display: block; margin-top: 4px; font-size: 11px; }
 #hint { font-size: 10px; color: #77766f; gap: 12px; line-height: 1.5; }
 #counts { white-space: nowrap; }
 #grid { display: flex; gap: 6px; }
-#grid button { width: 66px; height: 29px; background: #fafaf8; border-color: #deded9; border-radius: 3px; color: #77766f; }
+#grid { overflow-x:auto; scrollbar-width:thin; }
+#grid button { flex:0 0 66px; width: 66px; height: 29px; background: #fafaf8; border-color: #deded9; border-radius: 3px; color: #77766f; }
 #grid button.active { outline: none; border-color: #a3a399; background: #eaeae5; color: #37352f; font-weight: 600; }
 .sidebar {
   background: var(--panel);
@@ -220,3 +221,40 @@ summary { color: #66655e; }
 [data-theme="dark"] #boxList { scrollbar-color: #505050 transparent; }
 [data-theme="dark"] input[type=checkbox] { accent-color: #a3b396; }
 [data-theme="dark"] textarea::placeholder { color: #96958f; }
+
+#reviewerTour {
+  position: fixed; inset: 0; margin: 0; padding: 0;
+  width: 100vw; height: 100dvh; max-width: none; max-height: none;
+  border: 0; background: transparent; color: var(--text); overflow: hidden;
+}
+#reviewerTour::backdrop { background: transparent; }
+#reviewerTour.tour-centered { background: #0006; }
+.tour-highlight {
+  position: fixed; pointer-events: none; border: 2px solid #8e9e7d;
+  border-radius: 5px; box-shadow: 0 0 0 100vmax #0006;
+}
+.tour-card {
+  position: fixed; width: min(360px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px); overflow: auto;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+  padding: 20px; box-shadow: 0 8px 32px #0003;
+}
+.tour-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+#tourCount { color: var(--muted); font-size: 11px; }
+#tourSkip { background:transparent; border-color:transparent; color:var(--muted); font-size:11px; padding:4px; }
+.tour-card h2 { margin:16px 0 8px; font-size:18px; font-weight:600; letter-spacing:-.3px; }
+.tour-card p { margin:0; font-size:13px; line-height:1.7; color:var(--muted); }
+.tour-card footer { display:flex; justify-content:space-between; gap:12px; margin-top:22px; }
+.tour-card footer button { padding:8px 12px; }
+[data-theme="dark"] .tour-card { background:#202020; }
+[data-theme="dark"] .tour-highlight { border-color:#c1c9b6; }
+#tourReplay { margin-top:10px; }
+.tour-gesture { display:inline-block; margin-top:16px; padding:7px 10px; border:1px solid var(--line); border-radius:4px; background:var(--panel); color:var(--text); font-size:12px; font-weight:600; }
+#reviewerTour { pointer-events:none; z-index:20; }
+#reviewerTour.tour-centered { background:transparent; }
+.tour-card { pointer-events:auto; width:min(300px, calc(100vw - 24px)); }
+.tour-highlight { box-shadow:none; }
+.tour-card .tour-task { margin-top:14px; padding:10px; border-left:3px solid #9b916f; background:var(--panel); color:var(--text); font-weight:500; }
+.tour-card .tour-task:empty { display:none; }
+.tour-card .tour-task.is-done { border-left-color:#819872; }
+.tour-skip-step { margin-top:12px; border:0; padding:4px 0; background:transparent; color:var(--muted); font-size:11px; }

@@ -1,5 +1,5 @@
 'use strict';
-const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg',W=1920,H=1080;
+const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';let W=1920,H=1080;
 const clone=x=>JSON.parse(JSON.stringify(x));
 const colors={valve:'#00bfff',flange:'#00ffdf',elbow:'#ff55ff',pipe:'#5cff57',tank:'#ff9f24',pump:'#aa7dff',strainer:'#ed8cff',tee:'#ff6240',reducer:'#ff5ca8'};
 const key='pano-editor-v2-'+DATA.source_sha256+'-'+DATA.revision;
@@ -9,6 +9,7 @@ const vp=$('viewport');
 // UI preferences are separate from annotation autosave, preserving existing exports.
 const uiKey=key+'-ui';let nextClass=null,lastLeftClick=null,lastRightClick=null;
 try{const ui=JSON.parse(localStorage.getItem(uiKey)||'null');if(ui&&Number.isInteger(ui.index)&&ui.index>=0&&ui.index<DATA.views.length)index=ui.index;if(ui&&DATA.class_names.includes(ui.nextClass))nextClass=ui.nextClass;}catch(e){}
+if(Number.isInteger(window.REVIEW_START_INDEX)&&window.REVIEW_START_INDEX>=0&&window.REVIEW_START_INDEX<DATA.views.length)index=window.REVIEW_START_INDEX;
 function saveUI(){try{localStorage.setItem(uiKey,JSON.stringify({index,nextClass}));}catch(e){}}
 function newBoxClass(){return nextClass||$('filter').value||$('selectedClass').value||'pipe';}
 function updateAddButton(){$('addMode').textContent=mode==='add'?'+ Box: '+newBoxClass():'+ Box';}
@@ -24,7 +25,7 @@ vp.addEventListener('auxclick',e=>{if(e.button===1||e.button===2)e.preventDefaul
 // The image owns right-click so the browser menu cannot interrupt the second click.
 vp.addEventListener('contextmenu',e=>e.preventDefault());
 function notice(s,error=false){$('notice').textContent=s;$('notice').style.color=error?'#a04c43':'';}
-function validQuad(q){if(!Array.isArray(q)||q.length!==4||!q.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&p[0]>=-.01&&p[0]<=W+.01&&p[1]>=-.01&&p[1]<=H+.01))return false;
+function validQuad(q,width=W,height=H){if(!Array.isArray(q)||q.length!==4||!q.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)&&p[0]>=-.01&&p[0]<=width+.01&&p[1]>=-.01&&p[1]<=height+.01))return false;
  const e=q.map((p,i)=>[q[(i+1)%4][0]-p[0],q[(i+1)%4][1]-p[1]]),lens=e.map(v=>Math.hypot(...v));
  if(Math.min(...lens)<1)return false;
  if(Math.abs(lens[0]-lens[2])>.06||Math.abs(lens[1]-lens[3])>.06)return false;
@@ -32,7 +33,7 @@ function validQuad(q){if(!Array.isArray(q)||q.length!==4||!q.every(p=>Array.isAr
 }
 function validateState(s){if(!s||!s.reviews||!s.annotations)throw Error('Missing review or annotation data.');
  for(const v of DATA.views){const list=s.annotations[v.view_index];if(!Array.isArray(list))throw Error('Missing view '+v.view_index);const ids=new Set();
-  for(const a of list){if(!Number.isInteger(a.id)||a.id<1||ids.has(a.id)||!DATA.class_names.includes(a.proposed_class)||!validQuad(a.quad_pixels))throw Error('Invalid box in view '+v.view_index);ids.add(a.id);}
+  for(const a of list){if(!Number.isInteger(a.id)||a.id<1||ids.has(a.id)||!DATA.class_names.includes(a.proposed_class)||!validQuad(a.quad_pixels,v.output_width||1920,v.output_height||1080))throw Error('Invalid box in view '+v.view_index);ids.add(a.id);}
   const r=s.reviews[v.view_index];if(r&&r.class_decisions){r.decision=DATA.class_names.every(c=>r.class_decisions[c]==='looks_correct')?'looks_correct':'not_reviewed';delete r.class_decisions;}if(r&&(!['not_reviewed','needs_changes','looks_correct','exclude'].includes(r.decision)||typeof r.notes!=='string'))throw Error('Invalid review in view '+v.view_index);
  }return s;
 }
@@ -234,7 +235,7 @@ $('uncertainCard').onclick=nextUncertainView;
 $('nextUncertainBox').onclick=nextUncertainBox;
 
 function progress(){renderUncertaintyCards();[...$('grid').children].forEach((b,i)=>{const r=state.reviews[i+1]||{};b.classList.toggle('active',i===index);b.style.boxShadow=({looks_correct:'inset 0 -3px #a3af98',needs_changes:'inset 0 -3px #b49462',exclude:'inset 0 -3px #aaa99f'})[r.decision]||'none';});$('progress').textContent=Object.values(state.reviews).filter(r=>r.decision==='looks_correct').length+'/'+DATA.views.length+' reviewed';}
-function renderView(reset=true){saveUI();const v=view();$('view').value=index;$('photo').setAttribute('href',v.image);$('viewTitle').textContent=`View ${String(v.view_index).padStart(2,'0')} · ${v.pitch_band}`;renderSidebar();progress();if(reset)fit();else draw();buttons();}
+function renderView(reset=true){saveUI();const v=view();W=v.output_width||1920;H=v.output_height||1080;$('photo').setAttribute('width',W);$('photo').setAttribute('height',H);$('view').value=index;$('photo').setAttribute('href',v.display_image||v.image);$('viewTitle').textContent=`View ${String(v.view_index).padStart(2,'0')} · ${v.pitch_band}`;renderSidebar();progress();if(reset)fit();else draw();buttons();}
 function change(i){if(drag)return;lastUncertainView=null;cancelPendingChord();lastPointer=null;lastRightClick=null;lastLeftClick=null;index=(i+DATA.views.length)%DATA.views.length;selected=null;tempQuad=null;renderView();}
 
 // Sweep a six-screen-pixel eraser across edges, including between pointer events.
@@ -388,6 +389,8 @@ vp.addEventListener('pointermove',e=>{
  if(q&&validQuad(q)){a.quad_pixels=q;draw();}
 });
 function finishDrag(e,cancel=false){if(!drag)return;const d=drag;drag=null;try{vp.releasePointerCapture(d.pointerId);}catch(e){}
+ if(!cancel&&d.kind==='pan'&&d.moved&&d.button===1)document.dispatchEvent(new CustomEvent('reviewer:wheel-pan'));
+
  if(d.kind==='erase'){
   lastLeftClick=null;lastRightClick=null;
   if(cancel){state=clone(d.before.state);selected=d.before.selected;renderSidebar();draw();progress();notice('Eraser stroke canceled.');return;}
@@ -444,7 +447,7 @@ $('delete').onclick=()=>{const a=active();if(a)mutate(()=>{a.deleted=true;normal
 $('applyGeometry').onclick=()=>{const a=active();if(!a)return;const vals=['cx','cy','bw','bh','angle'].map(id=>Number($(id).value)),[cx,cy,w,h,degrees]=vals,q=makeQuad(cx,cy,w,h,degrees*Math.PI/180);if(!vals.every(Number.isFinite)||w<2||h<2||!validQuad(q)){notice('Box must stay inside the image with width / height at least 2 pixels.',true);return;}mutate(()=>{a.quad_pixels=q;a.geometry_pending=false;a.geometry_edited=true;normalise(a);});};
 function saveReview(decision){if(drag)return;const r=review();if(decision){r.decision=decision;r.exclusion_reason=null;}r.notes=$('notes').value;r.updated=new Date().toISOString();renderReviewButtons();persist();progress();}
 $('reviewNotReviewed').onclick=()=>saveReview('not_reviewed');$('reviewReviewed').onclick=()=>saveReview('looks_correct');$('notes').oninput=()=>saveReview();
-function exported(){return {schema:'panorama-annotation-edits/v2',panorama_id:DATA.panorama_id,source_image_id:DATA.source_image_id,revision:DATA.revision,parent_revision:DATA.parent_revision,source_sha256:DATA.source_sha256,base_annotation_sha256:DATA.base_annotation_sha256,exported:new Date().toISOString(),image_size:[W,H],class_names:DATA.class_names,coordinates:'quad_pixels are on the original 1920 x 1080 clean view, independent of screen zoom and pan.',note:'Full edited annotations and review decisions. Deleted records retained for traceability. Not automatically approved for training.',views:Object.fromEntries(DATA.views.map(v=>[v.view_index,{...(state.reviews[v.view_index]||{decision:'not_reviewed',notes:''}),view_index:v.view_index,image:v.image,yaw_deg:v.yaw_deg,pitch_deg:v.pitch_deg,annotations:state.annotations[v.view_index].map(a=>{const b=clone(a);b.class_id=DATA.class_names.indexOf(b.proposed_class);b.quad_pixels=b.quad_pixels.map(p=>p.map(x=>+x.toFixed(4)));b.normalized_corners=b.quad_pixels.map(p=>[+(p[0]/W).toFixed(8),+(p[1]/H).toFixed(8)]);return b;})}]))};}
+function exported(){return {schema:'panorama-annotation-edits/v3',panorama_id:DATA.panorama_id,source_image_id:DATA.source_image_id,revision:DATA.revision,parent_revision:DATA.parent_revision,source_sha256:DATA.source_sha256,base_annotation_sha256:DATA.base_annotation_sha256,exported:new Date().toISOString(),class_names:DATA.class_names,coordinates:'Each view uses its own image_size in original image pixels, independent of zoom or pan.',note:'Annotation backup only; original image files are not embedded. Import into the same batch and revision.',views:Object.fromEntries(DATA.views.map(v=>[v.view_index,{...(state.reviews[v.view_index]||{decision:'not_reviewed',notes:''}),view_index:v.view_index,image:v.image,image_size:[v.output_width||1920,v.output_height||1080],annotations:state.annotations[v.view_index].map(a=>{const b=clone(a);b.class_id=DATA.class_names.indexOf(b.proposed_class);b.quad_pixels=b.quad_pixels.map(p=>p.map(x=>+x.toFixed(4)));b.normalized_corners=b.quad_pixels.map(p=>[+(p[0]/(v.output_width||1920)).toFixed(8),+(p[1]/(v.output_height||1080)).toFixed(8)]);return b;})}]))};}
 $('download').onclick=()=>{if(drag)return;const blob=new Blob([JSON.stringify(exported(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=DATA.source_image_id+'_'+DATA.panorama_id+'_annotation_edits_r'+DATA.revision+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('Edits downloaded. Send this JSON back.');};
 $('import').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const d=JSON.parse(await f.text());if(d.source_sha256!==DATA.source_sha256||d.panorama_id!==DATA.panorama_id)throw Error('This file belongs to a different panorama.');if(!d.views||typeof d.views!=='object')throw Error('Missing views.');const next=clone(state);
  if(['panorama-annotation-edits/v2','panorama-annotation-edits/v3'].includes(d.schema)){

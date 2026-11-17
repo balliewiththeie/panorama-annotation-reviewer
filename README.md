@@ -1,10 +1,16 @@
 # Pipe Annotation Reviewer
 
-A browser-based interface for reviewing and editing pipe-component annotations. This demonstration uses three supplied Genshin Impact scenes instead of confidential project imagery.
+A browser-based interface for reviewing and editing pipe-component annotations. Organise your own images into named batches, or explore three supplied Genshin Impact scenes instead of confidential project imagery.
 
 ## Open the demo
 
-[Open the live demo](https://balliewiththeie.github.io/panorama-annotation-reviewer/) once GitHub Pages deployment is complete. You can also open index.html locally in a modern desktop browser. No install or backend is required. Use the view selector or arrow buttons to switch between three independent scenes.
+[Open the dashboard](https://balliewiththeie.github.io/panorama-annotation-reviewer/) once GitHub Pages deployment is complete. Choose **New batch**, enter a name, and select or drop multiple JPEG, PNG or WebP images. Each picture becomes one review item; panorama splitting is not included. Open a thumbnail to annotate it, or open the sample batch to try the guided mouse tutorial.
+
+Uploads are stored locally using IndexedDB, not sent to a server or shared with other visitors. Use the same browser and site address to return to your batches. Clearing browser data removes uploaded batches. Keep the original images and download annotation JSON backups. A JSON export can be imported into its original batch and revision; it does not recreate a lost image library.
+
+Limits: 50 images per batch, 15 MB per image, 150 MB per batch, and 40 megapixels per image. Browser storage capacity may impose a lower limit. Files that cannot be decoded are listed before creation. New batches start without annotations. The sample images retain the existing 53 reviewed boxes.
+
+You can also open index.html locally, but browser storage support for local files varies. GitHub Pages is the preferred place to test uploads. No server or account is required.
 
 ## Try it
 
@@ -14,7 +20,7 @@ A browser-based interface for reviewing and editing pipe-component annotations. 
 - Mark a scene reviewed and add notes.
 - Download edits as JSON and import them again into this demo.
 
-Edits are stored in this browser. Export JSON for a portable copy. The sample boxes are illustrative; they are not validated industrial annotations. Revision 02 starts with 53 active user-reviewed annotations across three reviewed scenes; four deleted records are retained for history. Earlier revision 01 exports belong to the previous baseline. Images retain their aspect ratio within a 1920 × 1080 annotation canvas, so some scenes have blank margins.
+Edits are stored in this browser. Export JSON for a portable copy. Uploaded images use their native dimensions; exports include image_size for each image. The sample boxes are illustrative; they are not validated industrial annotations. Revision 02 starts with 53 active user-reviewed annotations across three reviewed scenes; four deleted records are retained for history. Earlier revision 01 exports belong to the previous baseline. The sample scenes use the existing 1920 × 1080 annotation canvas, so some have blank margins.
 
 ## My contribution and AI assistance
 
